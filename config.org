@@ -1,0 +1,142 @@
+
+#+TITLE: Emacs Configuration
+
+* Configure Emacs Startup
+
+#+begin_src emacs-lisp :exports none :tangle early-init.el
+(setq package-enable-at-startup nil)
+#+end_src
+
+#+begin_src emacs-lisp :exports none :tangle init.el
+(org-babel-load-file
+ (expand-file-name
+  "config.org"
+  user-emacs-directory))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(evil package-lint)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+#+end_src
+
+* Package Steup
+
+#+begin_src emacs-lisp :exports none :tangle package-setup.el
+(require 'package)
+(add-to-list 'packge-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+;; Install and confiure use-package
+(unless (package-installed-p 'use-package)
+(package-refresh-contents)
+(package-install 'use-package))
+(eval-when-compile (require 'use-package))
+(setq use-package-always-ensure t)
+#+end_src
+
+* Dired Configurations
+
+#+begin_src emacs-lisp :exports none :tangle dired.el
+      (use-package dired
+	:ensure nil
+	:config
+	(setq (dired-recursive-copies 'always dired-recursive-deletes))
+#+end_src
+
+* Magit Configurations
+
+#+begin_src emacs-lisp :exports none :tangle magit.el
+      (use-package magit
+	:commands magit-status
+	:config (setq magit-save-repository-buffers 'dontask
+		      magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
+#+end_src
+
+* Evil Mode Configuration
+
+#+begin_src emacs-lisp :exports none :tangle evil.el
+  (use-package evil
+    :ensure t
+    :init
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
+#+end_src
+
+* LSP Configuration
+
+#+begin_src emacs-lisp :exports none :tangle lsp.el
+	(use-package lsp-mode
+	  :commands lsp
+	  :hook ((python-mode . lsp)
+		 (c-mode . lsp)
+		 (c++-mode . lsp)))
+#+end_src
+
+* Org Agenda and Org Roam Configurations
+
+#+begin_src emacs-lisp :exports none :tangle org.el
+    (use-package org
+      :config
+      ;; Myconfigs)
+#+end_src
+
+* Pandoc and EPUB Configs
+
+#+begin_src emacs-lisp :exports none :tangle pandoc.el
+  (use-package pandoc-mode
+    :hook (markdown-mode . pandoc-mode))
+#+end_src
+
+#+begin_src emacs-lisp :exports none :tangle nov.el
+  (use-package nov
+    :mode ("\\.epub\\'" . nov-mode))
+#+end_src
+
+* Makefile Support Configurations
+
+#+begin_src emacs-lisp :exports none :tangle makefile.el
+    (use-package makefile-executor
+      :commands makefile-executor-execute
+      :init (setq makefile-executor-executable "make"))
+#+end_src
+* Email Configuration
+
+** mu4e Configuration for Microsoft Exchange
+
+#+NAME: email-variables
+
+#+begin_src emacs-lisp :exports none :tangle mu4e.el
+  (setq mu4e-email-address ""
+	mu4e-smtp-server ""
+      mu4e-imap-server "")
+
+  (use-package mu4e
+    :ensure nil
+    :config
+    (setq mu4e-maildir "~/.mail"
+	  mu4e-contexts `( ,(make-mu4e-context
+			     :name "Exchange"
+			     :enter-func (lambda () (mu4e-message "Switch to Exchange context"))
+			     :leave-func (lambda()(mu4e-clear-caches))
+			     :match-func (lambda (msg) (when msg (string-prefix-p "/Exchange" (mu4e-message-field msg :maildir))))
+			     :vars '((user-mail-address . ,mu4e-email-address)
+				     (smtpmail-smtp-user . ,mu4e-email-address)
+				     (smtpmail-default-smtp-server . ,mu4e-smtp-server)
+				     (smtpmail-smtp-server . ,mu4e-smtp-server)
+				     (smtpmail-smtp-service . 587)
+				     (mu4e-drafts-folder . "/Exchange/Drafts")
+				     (mu4e-sent-folder . "/Exchange/Sent")
+				     (mu4e-trash-folder . "/Exchange/Trash")
+				     (mu4e-refile-folder . "/Exchange/Archive")
+				     (mu4e-sent-messages-behaviour . sent) )))))
+				     
+#+end_src
+
