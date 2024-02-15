@@ -1,4 +1,5 @@
 # Compiled
+*.el
 *.elc
 
 # Packaging
@@ -9,3 +10,7 @@
 
 # Undo-tree save-files
 *.~undo-tree
+
+# Package managers
+straight/*
+elpa/*
